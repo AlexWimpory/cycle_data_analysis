@@ -1,6 +1,10 @@
 import folium
 import webbrowser
+import osmnx as ox
+import networkx as nx
 
+
+# TODO No path exception
 
 class Map:
     def __init__(self, center, zoom_start):
@@ -28,9 +32,21 @@ class Map:
             fill=True,
         ).add_to(self.map)
 
+    def plot_shortest_cycle_route(self):
+        # graph_data = ox.graph_from_point(self.center, dist=750, network_type="bike", retain_all=True)
+        # ox.save_graphml(graph_data, "data/network.graphml")
+        graph_data = ox.load_graphml("data/network.graphml")
+        origin_node = list(graph_data.nodes())[0]
+        destination_node = list(graph_data.nodes())[30]
+        route = nx.shortest_path(graph_data, origin_node, destination_node)
+        ox.plot_route_folium(graph_data, route, self.map, weight=10)
+        ox.plot_graph_folium(graph_data, self.map, popup_attribute="name", weight=2, color="#8b0000")
 
-# Define coordinates of where we want to center our map
-cords = [51.5072, -0.1276]
-bike_map = Map(center=cords, zoom_start=10)
-bike_map.add_station((51.529163, -0.10997), "River Street , Clerkenwell")
-bike_map.show_map()
+
+if __name__ == '__main__':
+    # Define coordinates of where we want to center our map
+    cords = (51.5072, -0.1276)
+    bike_map = Map(cords, 10)
+    bike_map.add_station((51.529163, -0.10997), "River Street , Clerkenwell")
+    bike_map.plot_shortest_cycle_route()
+    bike_map.show_map()
