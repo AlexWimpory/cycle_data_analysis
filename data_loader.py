@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class Loader:
@@ -52,7 +51,7 @@ class Loader:
 
 if __name__ == '__main__':
     data = Loader("data/bike_journeys.csv", "data/weather.csv", "data/bike_stations.csv")
-    plt.scatter(data.daily["TAVG (CELSIUS)"], data.daily["JOURNEYS"])
-    # plt.xlim(10, 24)
-    # plt.ylim(15000, 45000)
-    plt.show()
+    print(data.locations["Latitude"].max())
+    print(data.locations["Latitude"].min())
+    print(data.locations["Longitude"].max())
+    print(data.locations["Longitude"].min())
