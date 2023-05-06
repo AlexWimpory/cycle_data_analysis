@@ -1,11 +1,11 @@
 import math
-
 import folium
 import webbrowser
 import osmnx as ox
 import networkx as nx
 import branca.colormap as cmp
 from osmnx import distance
+import config
 
 
 # TODO No path exception
@@ -29,10 +29,13 @@ class Map:
         # Create map
         self.map = folium.Map(location=self.center, zoom_start=self.zoom_start)
         self.scale_generator = scale_generator
+        # Load network
+        self.graph_data = ox.load_graphml("data/network.graphml")
 
     def show_map(self):
+        print("Loading map")
         self.scale_generator.linear.add_to(self.map)
-        folium.TileLayer('cartodbpositron').add_to(self.map)
+        folium.TileLayer(config.map_style).add_to(self.map)
         self.map.save("map.html")
         webbrowser.open("map.html")
 
@@ -55,20 +58,17 @@ class Map:
             ).add_to(self.map)
 
     def plot_network(self):
-        graph_data = ox.load_graphml("data/network.graphml")
-        ox.plot_graph_folium(graph_data, self.map, popup_attribute="name", weight=2, color="#8b0000")
+        ox.plot_graph_folium(self.graph_data, self.map, popup_attribute="name", weight=2, color="#8b0000")
 
-    def find_node(self, start_cords, end_cords):
-        graph_data = ox.load_graphml("data/network.graphml")
-        start_node = ox.distance.nearest_nodes(graph_data, start_cords[0], start_cords[1])
-        end_node = ox.distance.nearest_nodes(graph_data, end_cords[0], end_cords[1])
-        return start_node, end_node
+    def find_node(self, cords):
+        print(f"Finding node {cords}")
+        node = ox.distance.nearest_nodes(self.graph_data, cords[0], cords[1])
+        return node
 
     def plot_shortest_cycle_route(self, start, end):
-        graph_data = ox.load_graphml("data/network.graphml")
-        start_node, end_node = self.find_node(start, end)
-        route = nx.shortest_path(graph_data, start_node, end_node)
-        ox.plot_route_folium(graph_data, route, self.map, weight=10)
+        print("Calculating shortest route")
+        route = nx.shortest_path(self.graph_data, self.find_node(start), self.find_node(end))
+        ox.plot_route_folium(self.graph_data, route, self.map, weight=10)
 
 
 class ScaleGenerator:
@@ -76,19 +76,17 @@ class ScaleGenerator:
         self.max_visitors = max_visitors
         self.min_visitors = min_visitors
         self.linear = cmp.LinearColormap(
-            ['yellow', 'red'],
+            [config.circle_colour_1, config.circle_colour_2],
             vmin=self.min_visitors, vmax=self.max_visitors,
-            caption='Visitors over 50 days'  # Caption for Color scale or Legend
+            caption='Visitors over 50 days'
         )
 
     def calculate_colour(self, visitors):
         return self.linear.rgba_hex_str(visitors)
 
     def calculate_size(self, visitors):
-        min_radius = 10
-        max_radius = 150
         scale = visitors / (self.max_visitors - self.min_visitors)
-        radius = ((max_radius - min_radius) * scale) + min_radius
+        radius = ((config.max_circle_radius - config.min_circle_radius) * scale) + config.min_circle_radius
         return radius
 
 

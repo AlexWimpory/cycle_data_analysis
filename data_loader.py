@@ -54,6 +54,10 @@ class Loader:
         # exist due to there being visitors but the location is unknown
         return location_df
 
+    def calculate_max_min_visitors(self):
+        max_visitors = self.locations["Visitors"].max()
+        min_visitors = self.locations["Visitors"].min()
+        return max_visitors, min_visitors
 
 if __name__ == '__main__':
     data = Loader("data/bike_journeys.csv", "data/weather.csv", "data/bike_stations.csv")
