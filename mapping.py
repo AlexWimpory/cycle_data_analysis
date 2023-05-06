@@ -5,11 +5,10 @@ import webbrowser
 import osmnx as ox
 import networkx as nx
 import branca.colormap as cmp
+from osmnx import distance
 
 
 # TODO No path exception
-# TODO Generate network based on long,lat box
-# TODO find node based on long, lat allowing for shortest distance between stations
 # TODO Logging
 
 def generate_cycle_network(side_1, side_2, side_3, side_4):
@@ -59,11 +58,16 @@ class Map:
         graph_data = ox.load_graphml("data/network.graphml")
         ox.plot_graph_folium(graph_data, self.map, popup_attribute="name", weight=2, color="#8b0000")
 
-    def plot_shortest_cycle_route(self):
+    def find_node(self, start_cords, end_cords):
         graph_data = ox.load_graphml("data/network.graphml")
-        origin_node = list(graph_data.nodes())[0]
-        destination_node = list(graph_data.nodes())[30]
-        route = nx.shortest_path(graph_data, origin_node, destination_node)
+        start_node = ox.distance.nearest_nodes(graph_data, start_cords[0], start_cords[1])
+        end_node = ox.distance.nearest_nodes(graph_data, end_cords[0], end_cords[1])
+        return start_node, end_node
+
+    def plot_shortest_cycle_route(self, start, end):
+        graph_data = ox.load_graphml("data/network.graphml")
+        start_node, end_node = self.find_node(start, end)
+        route = nx.shortest_path(graph_data, start_node, end_node)
         ox.plot_route_folium(graph_data, route, self.map, weight=10)
 
 
@@ -89,5 +93,5 @@ class ScaleGenerator:
 
 
 if __name__ == '__main__':
-    # generate_cycle_network(51.550267, 51.453854, -0.00083, -0.238211)
-    generate_main_roads_network(51.550267, 51.453854, -0.00083, -0.238211)
+    generate_cycle_network(51.550267, 51.453854, -0.00083, -0.238211)
+    # generate_main_roads_network(51.550267, 51.453854, -0.00083, -0.238211)
