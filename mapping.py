@@ -12,12 +12,16 @@ import branca.colormap as cmp
 # TODO find node based on long, lat allowing for shortest distance between stations
 # TODO Logging
 
-# Lat
-# 51.549369
-# 51.454752
-# Long
-# -0.002275
-# -0.236769
+def generate_cycle_network(side_1, side_2, side_3, side_4):
+    graph_data = ox.graph_from_bbox(side_1, side_2, side_3, side_4, network_type="bike", retain_all=True)
+    ox.save_graphml(graph_data, "data/network.graphml")
+
+
+def generate_main_roads_network(side_1, side_2, side_3, side_4):
+    graph_data = ox.graph_from_bbox(side_1, side_2, side_3, side_4, network_type='drive',
+                                    custom_filter='["highway"~"primary"]', retain_all=True)
+    ox.save_graphml(graph_data, "data/network.graphml")
+
 
 class Map:
     def __init__(self, center, zoom_start, scale_generator):
@@ -51,10 +55,6 @@ class Map:
                 fill=True,
             ).add_to(self.map)
 
-    def generate_cycle_network(self):
-        graph_data = ox.graph_from_point(self.center, dist=750, network_type="bike", retain_all=True)
-        ox.save_graphml(graph_data, "data/network.graphml")
-
     def plot_network(self):
         graph_data = ox.load_graphml("data/network.graphml")
         ox.plot_graph_folium(graph_data, self.map, popup_attribute="name", weight=2, color="#8b0000")
@@ -83,9 +83,11 @@ class ScaleGenerator:
     def calculate_size(self, visitors):
         min_radius = 10
         max_radius = 150
+        scale = visitors / (self.max_visitors - self.min_visitors)
+        radius = ((max_radius - min_radius) * scale) + min_radius
+        return radius
 
-        a = visitors / (self.max_visitors - self.min_visitors)
-        b = ((max_radius - min_radius) * a) + min_radius
 
-        return b
-
+if __name__ == '__main__':
+    # generate_cycle_network(51.550267, 51.453854, -0.00083, -0.238211)
+    generate_main_roads_network(51.550267, 51.453854, -0.00083, -0.238211)

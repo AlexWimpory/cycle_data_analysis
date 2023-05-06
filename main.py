@@ -16,7 +16,9 @@ if __name__ == '__main__':
         if type(row["Coordinates"]) is tuple:
             bike_map.add_station(row["Coordinates"], row["Station Name"], row["Visitors"])
     # bike_map.plot_shortest_cycle_route()
+    bike_map.plot_network()
     bike_map.show_map()
 
     plt.scatter(data.daily["TAVG (CELSIUS)"], data.daily["JOURNEYS"])
     plt.show()
+
