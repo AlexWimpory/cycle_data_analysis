@@ -9,7 +9,6 @@ class Loader:
 
     @staticmethod
     def load_journeys(path):
-        # journey_df = pd.read_csv(path, parse_dates={"end": ["End Year", "End Month", "End Date"]})
         journey_df = pd.read_csv(path,
                                  dtype={'End Year': 'str', 'End Month': 'str', 'End Date': 'str',
                                         'End Hour': 'str', 'End Minute': 'str',
@@ -42,10 +41,17 @@ class Loader:
         daily_df = pd.merge(daily_journey_df, daily_df, how="outer", on="start")
         return daily_df
 
-    @staticmethod
-    def load_locations(path):
+    def load_locations(self, path):
         location_df = pd.read_csv(path)
         location_df['Coordinates'] = list(zip(location_df.Latitude, location_df.Longitude))
+
+        start_location_visitors = self.journeys.groupby(self.journeys['Start Station ID']).size()
+        end_location_visitors = self.journeys.groupby(self.journeys['End Station ID']).size()
+        total_location_visitors = start_location_visitors.add(end_location_visitors).to_frame().reset_index()
+        total_location_visitors.rename(columns={"Start Station ID": 'Station ID', 0: "Visitors"}, inplace=True)
+        location_df = pd.merge(location_df, total_location_visitors, how="outer", on="Station ID")
+        # Missing location data for station ID 147,201,300,461,551,565,705,783 -> a bit alarming as these locations
+        # exist due to there being visitors but the location is unknown
         return location_df
 
 
