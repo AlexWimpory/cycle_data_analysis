@@ -6,9 +6,9 @@ from osmnx import distance
 import networkx as nx
 import branca.colormap as cmp
 import config
+import networkx
+import matplotlib.colors as mcol
 
-
-# TODO No path exception
 
 def generate_cycle_network(side_1, side_2, side_3, side_4):
     """
@@ -99,14 +99,33 @@ class Map:
         Find the shortest path between 2 nodes using networkx and Dijkstra’s algorithm
         """
         print("Calculating shortest route")
-        route = nx.shortest_path(self.graph_data, self.find_node(start), self.find_node(end))
-        ox.plot_route_folium(self.graph_data, route, self.map, weight=4, color=colour)
+        # Exception if there is no route is calculated
+        try:
+            route = nx.shortest_path(self.graph_data, self.find_node(start), self.find_node(end))
+            ox.plot_route_folium(self.graph_data, route, self.map, weight=4, color=colour)
+        except networkx.exception.NetworkXNoPath:
+            print(f"No route found between {start} and {end}")
+
+    def plot_cycle_routes(self, routes):
+        """
+        Plot multiple cycle routes
+        """
+        # Colour iterator so that each route is a different colour
+        # Max of 10 colours
+        colours = iter(mcol.TABLEAU_COLORS)
+        for index, row in routes.iterrows():
+            # Check for unknown locations
+            if math.isnan(row["Start Cords"][0]) or math.isnan(row["End Cords"][0]):
+                print("Station location unknown")
+            else:
+                self.plot_shortest_cycle_route(row["Start Cords"], row["End Cords"], mcol.to_hex(next(colours)))
 
 
 class ScaleGenerator:
     """
     Scale colour and size, based on max and min numbers
     """
+
     def __init__(self, max_visitors, min_visitors):
         self.max_visitors = max_visitors
         self.min_visitors = min_visitors

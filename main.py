@@ -2,7 +2,6 @@ from data_loader import Loader
 from mapping import Map, ScaleGenerator
 from graphs import plot_temp_vs_journeys
 import config
-import matplotlib.colors as mcol
 
 if __name__ == '__main__':
     # Load and process csv files
@@ -21,10 +20,8 @@ if __name__ == '__main__':
     # bike_map.plot_shortest_cycle_route((-0.10997, 51.529163), (-0.136039, 51.519914))
 
     # Plot most used routes excluding round trips
-    routes = data.calculate_common_routes(10)
-    colours = iter(mcol.TABLEAU_COLORS)
-    for index, row in routes.iterrows():
-        bike_map.plot_shortest_cycle_route(row["Start Cords"], row["End Cords"], mcol.to_hex(next(colours)))
+    routes = data.calculate_common_routes(10, 20)
+    bike_map.plot_cycle_routes(routes)
 
     # Open map in browser
     bike_map.show_map()

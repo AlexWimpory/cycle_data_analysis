@@ -80,8 +80,9 @@ class Loader:
         filtered = self.journeys.query('`Start Station ID` != `End Station ID`')
         return filtered.groupby(['Start Station ID', 'End Station ID']).size()
 
-    def calculate_common_routes(self, num):
-        common = self.routes.nlargest(n=num, keep="all").to_frame().reset_index()
+    def calculate_common_routes(self, num, skip):
+        common = self.routes.nlargest(n=num + skip, keep="all").to_frame().reset_index()
+        common = common.iloc[skip:]
         common["Start Cords"] = common["Start Station ID"].apply(self.find_station_cords)
         common["End Cords"] = common["End Station ID"].apply(self.find_station_cords)
         return common
