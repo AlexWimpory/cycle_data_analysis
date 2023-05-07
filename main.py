@@ -10,13 +10,12 @@ if __name__ == '__main__':
     scale_generator = ScaleGenerator(max_visitors, min_visitors)
     # Create a Map object which handles osmnx and folium
     bike_map = Map(config.center_cords, config.zoom_start, scale_generator)
-    for index, row in data.locations.iterrows():
-        # Problem of incomplete data -> move to mapper?
-        # Add log
-        if type(row["Coordinates"]) is tuple:
-            bike_map.add_station(row["Coordinates"], row["Station Name"], row["Visitors"])
+    # Add stations to the map
+    bike_map.add_stations(data.locations)
+    # Find and plot shortest route between cords
     bike_map.plot_shortest_cycle_route((-0.10997, 51.529163), (-0.136039, 51.519914))
     bike_map.plot_shortest_cycle_route((-0.125979, 51.526357), (-0.105344, 51.515059))
+    # Open map in browser
     bike_map.show_map()
 
 

@@ -3,6 +3,10 @@ import operator
 
 
 def new_lat_long(latitude, longitude, dy, dx, f):
+    """
+    Calculate a new longitude/latitude having moved by dx/dy kilometers.  Rough estimate considering the curvature of
+    the earth
+    """
     earth = 6378.137
     new_lat = f(latitude, (dy / earth) * (180 / pi))
     new_long = f(longitude, (dx / earth) * (180 / pi) / cos(latitude * pi / 180))

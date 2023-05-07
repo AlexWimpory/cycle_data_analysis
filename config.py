@@ -1,4 +1,8 @@
+# Network
+network_path = "data/network.graphml"
+
 # Map
+map_name = "map.html"
 center_cords = [51.5020605, -0.119522]
 zoom_start = 12.5
 map_style = 'cartodbpositron'
