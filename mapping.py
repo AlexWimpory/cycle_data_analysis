@@ -94,13 +94,13 @@ class Map:
         node = ox.distance.nearest_nodes(self.graph_data, cords[0], cords[1])
         return node
 
-    def plot_shortest_cycle_route(self, start, end):
+    def plot_shortest_cycle_route(self, start, end, colour):
         """
         Find the shortest path between 2 nodes using networkx and Dijkstra’s algorithm
         """
         print("Calculating shortest route")
         route = nx.shortest_path(self.graph_data, self.find_node(start), self.find_node(end))
-        ox.plot_route_folium(self.graph_data, route, self.map, weight=10)
+        ox.plot_route_folium(self.graph_data, route, self.map, weight=4, color=colour)
 
 
 class ScaleGenerator:

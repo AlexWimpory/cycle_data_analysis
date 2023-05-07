@@ -6,6 +6,7 @@ class Loader:
         self.journeys = self.load_journeys(journey_path)
         self.daily = self.generate_daily(weather_path)
         self.locations = self.load_locations(station_path)
+        self.routes = self.generate_route()
 
     @staticmethod
     def load_journeys(path):
@@ -58,8 +59,8 @@ class Loader:
         # Combine lat and long into a single tuple column
         location_df['Coordinates'] = list(zip(location_df.Latitude, location_df.Longitude))
         # Add a column which contains the total visitors at each location over 50 days
-        start_location_visitors = self.journeys.groupby(self.journeys['Start Station ID']).size()
-        end_location_visitors = self.journeys.groupby(self.journeys['End Station ID']).size()
+        start_location_visitors = self.journeys.groupby('Start Station ID').size()
+        end_location_visitors = self.journeys.groupby('End Station ID').size()
         total_location_visitors = start_location_visitors.add(end_location_visitors).to_frame().reset_index()
         total_location_visitors.rename(columns={"Start Station ID": 'Station ID', 0: "Visitors"}, inplace=True)
         location_df = pd.merge(location_df, total_location_visitors, how="outer", on="Station ID")
@@ -74,6 +75,20 @@ class Loader:
         max_visitors = self.locations["Visitors"].max()
         min_visitors = self.locations["Visitors"].min()
         return max_visitors, min_visitors
+
+    def generate_route(self):
+        filtered = self.journeys.query('`Start Station ID` != `End Station ID`')
+        return filtered.groupby(['Start Station ID', 'End Station ID']).size()
+
+    def calculate_common_routes(self, num):
+        common = self.routes.nlargest(n=num, keep="all").to_frame().reset_index()
+        common["Start Cords"] = common["Start Station ID"].apply(self.find_station_cords)
+        common["End Cords"] = common["End Station ID"].apply(self.find_station_cords)
+        return common
+
+    def find_station_cords(self, station_id):
+        row = self.locations.loc[self.locations['Station ID'] == station_id]
+        return row.iloc[0]["Longitude"], row.iloc[0]["Latitude"]
 
 
 if __name__ == '__main__':
