@@ -1,6 +1,6 @@
 from data_loader import Loader
 from mapping import Map, ScaleGenerator
-from graphs import plot_temp_vs_journeys
+from graphs import plot_temp_vs_journeys, plot_prcp_vs_journeys
 import config
 
 ###
@@ -30,7 +30,9 @@ if __name__ == '__main__':
     # Open map in browser
     bike_map.show_map()
 
+    # Plot graphs
     plot_temp_vs_journeys(data)
+    plot_prcp_vs_journeys(data)
 
 
 
