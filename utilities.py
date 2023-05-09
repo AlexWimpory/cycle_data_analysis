@@ -13,6 +13,12 @@ def new_lat_long(latitude, longitude, dy, dx, f):
     return round(new_lat, 6), round(new_long, 6)
 
 
+def quantile_test(df, column_name):
+    q_low = df[column_name].quantile(0.01)
+    q_hi = df[column_name].quantile(0.99)
+    return df[(df[column_name] < q_hi) & (df[column_name] > q_low)]
+
+
 if __name__ == '__main__':
     # Lat
     # 51.549369
