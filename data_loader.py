@@ -77,11 +77,22 @@ class Loader:
         return max_visitors, min_visitors
 
     def generate_route(self):
+        """
+        Generate dataframe containing the number of journeys per route
+        """
+        print("Generating route dataframe")
         filtered = self.journeys.query('`Start Station ID` != `End Station ID`')
-        return filtered.groupby(['Start Station ID', 'End Station ID']).size()
+        filtered = filtered.groupby(['Start Station ID', 'End Station ID']).size().to_frame().reset_index()
+        filtered.rename(columns={0: "Journeys"}, inplace=True)
+        return filtered
 
     def calculate_common_routes(self, num, skip):
-        common = self.routes.nlargest(n=num + skip, keep="all").to_frame().reset_index()
+        """
+        Use routes dataframe to calculate common routes.  Max 10 at a time with the possibility of first results being
+        skipped
+        """
+        print("Calculating common routes")
+        common = self.routes.nlargest(n=num + skip, keep="all", columns="Journeys")
         common = common.iloc[skip:]
         common["Start Cords"] = common["Start Station ID"].apply(self.find_station_cords)
         common["End Cords"] = common["End Station ID"].apply(self.find_station_cords)
@@ -90,6 +101,26 @@ class Loader:
     def find_station_cords(self, station_id):
         row = self.locations.loc[self.locations['Station ID'] == station_id]
         return row.iloc[0]["Longitude"], row.iloc[0]["Latitude"]
+
+    def analyse_rain(self):
+        """
+        Calculate the mean journeys for dry and rainy days
+        """
+        rain_count = 0
+        dry_count = 0
+        rain_journeys = 0
+        dry_journeys = 0
+        for index, row in self.daily.iterrows():
+            if row["PRCP (MM)"] == 0:
+                dry_count += 1
+                dry_journeys = dry_journeys + row["JOURNEYS"]
+            else:
+                rain_count += 1
+                rain_journeys = rain_journeys + row["JOURNEYS"]
+        rain_mean = rain_journeys / rain_count
+        dry_mean = dry_journeys / dry_count
+        print(f"Rain mean {rain_mean}")
+        print(f"Dry mean {dry_mean}")
 
 
 if __name__ == '__main__':

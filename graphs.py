@@ -1,25 +1,30 @@
 import matplotlib.pyplot as plt
-from utilities import quantile_test
+from utilities import percentile_test
 from scipy import stats
 
 
 def plot_temp_vs_journeys(data):
-    df_filtered = quantile_test(data.daily, "TAVG (CELSIUS)")
-    df_filtered = quantile_test(df_filtered, "JOURNEYS")
+    # Plot temperature vs journeys on a graph using matplotlib
+    # Percentile test to remove outliers
+    df_filtered = percentile_test(data.daily, "TAVG (CELSIUS)")
+    df_filtered = percentile_test(df_filtered, "JOURNEYS")
+    # Calculate line of best fit with linear regression
     slope, intercept, _, _, _ = stats.linregress(df_filtered["TAVG (CELSIUS)"], df_filtered["JOURNEYS"])
     best_fit = [slope * i + intercept for i in df_filtered["TAVG (CELSIUS)"]]
     plt.scatter(df_filtered["TAVG (CELSIUS)"], df_filtered["JOURNEYS"])
+    # Formatting
     plt.plot(df_filtered["TAVG (CELSIUS)"], best_fit, color="m")
     plt.title("Temperature vs Journeys")
     plt.xlabel("Average Temperature (°C)")
     plt.ylabel("Number of Journeys")
     plt.grid(color='#d9d9d9')
+
     plt.savefig('graphs/temp_vs_journeys.png')
     plt.show()
 
 
 def plot_prcp_vs_journeys(data):
-    fig = plt.figure(figsize=(15,6))
+    fig = plt.figure(figsize=(15, 6))
 
     # Creating multiple axis for different scales
     ax = fig.add_subplot(111)

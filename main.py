@@ -10,7 +10,6 @@ import config
 if __name__ == '__main__':
     # Load and process csv files
     data = Loader("data/bike_journeys.csv", "data/weather.csv", "data/bike_stations.csv")
-    data.generate_route()
     # Create object which scales colour and size between the max and min numbers
     max_visitors, min_visitors = data.calculate_max_min_visitors()
     scale_generator = ScaleGenerator(max_visitors, min_visitors)
@@ -24,8 +23,8 @@ if __name__ == '__main__':
     bike_map.plot_shortest_cycle_route((-0.10997, 51.529163), (-0.136039, 51.519914), "blue")
 
     # # Plot most used routes excluding round trips
-    # routes = data.calculate_common_routes(10, 20)
-    # bike_map.plot_cycle_routes(routes)
+    routes = data.calculate_common_routes(10, 35)
+    bike_map.plot_cycle_routes(routes)
 
     # Open map in browser
     bike_map.show_map()
@@ -33,6 +32,7 @@ if __name__ == '__main__':
     # Plot graphs
     plot_temp_vs_journeys(data)
     plot_prcp_vs_journeys(data)
+    data.analyse_rain()
 
 
 
